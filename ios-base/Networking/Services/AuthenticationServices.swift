@@ -151,7 +151,7 @@ class AuthenticationServices {
     UserDataManager.currentUser = User(
       dictionary: response["user"] as? [String: Any] ?? [:]
     )
-    if let headers = headers as? [String: Any] {
+    if let headers = headers as? [String: String] {
       SessionManager.currentSession = Session(headers: headers)
     }
   }

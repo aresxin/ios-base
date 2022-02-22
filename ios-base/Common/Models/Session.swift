@@ -14,7 +14,9 @@ struct Session: Codable {
   var accessToken: String?
   var expiry: Date?
   
-  var isValid: Bool { [uid, accessToken, client].allSatisfy { $0 != nil } }
+  var isValid: Bool {
+    [uid, accessToken, client].allSatisfy { !($0 ?? "").isEmpty }
+  }
   
   private enum CodingKeys: String, CodingKey {
     case uid
@@ -33,18 +35,15 @@ struct Session: Codable {
     self.expiry = expires
   }
   
-  init?(headers: [String: Any]) {
-    var loweredHeaders = headers
-    loweredHeaders.lowercaseKeys()
-    guard let stringHeaders = loweredHeaders as? [String: String] else {
-      return nil
-    }
-    if let expiryString = stringHeaders[APIClient.HTTPHeader.expiry.rawValue],
+  init?(headers: [String: String]) {
+    var loweredKeysHeaders = headers
+    loweredKeysHeaders.lowercaseKeys()
+    if let expiryString = loweredKeysHeaders[APIClient.HTTPHeader.expiry.rawValue],
       let expiryNumber = Double(expiryString) {
       expiry = Date(timeIntervalSince1970: expiryNumber)
     }
-    uid = stringHeaders[APIClient.HTTPHeader.uid.rawValue]
-    client = stringHeaders[APIClient.HTTPHeader.client.rawValue]
-    accessToken = stringHeaders[APIClient.HTTPHeader.token.rawValue]
+    uid = loweredKeysHeaders[APIClient.HTTPHeader.uid.rawValue]
+    client = loweredKeysHeaders[APIClient.HTTPHeader.client.rawValue]
+    accessToken = loweredKeysHeaders[APIClient.HTTPHeader.token.rawValue]
   }
 }
